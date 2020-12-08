@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <a href='@Url.Action("AddEmployee")' class="btn btn-success">New Employee</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-hover table-striped table-bordered" cellspacing="0" id="tblEmployeeList"></table>
+    </div>
+</div>
+
+@section scripts{ 
+    <script>
+        $(document).ready(function () {
+
+            GetEmployeeList();
+        });
+
+        function GetEmployeeList() {
+            table = $('#tblEmployeeList').DataTable({
+                bLengthChange: false,
+                responsive: true,
+                destroy: true,
+                order: [[0, 'asc']],
+                paging: false,
+                ordering: false,
+                ajax: {
+                    type: "GET",
+                    url: '@Url.Action("GetEmployeeList")',
+                    dataType: 'json',
+                    dataSrc: function (json) {
+                        var a = new Array();
+                        for (var b = 0; b <= json.length - 1; b++) {
+                            var c = json[b];
+                            a.push({
+                                'EmployeeID': c.employeeID,
+                                'Name': c.name,
+                                'BirthDate': moment(c.birthDate).format("MM/DD/YYYY"),
+                                'TIN': c.tin,
+                                'EmployeeType': c.employeeType,
+                                'EmployeeTypeDescription': c.employeeTypeDescription
+                            });
+                        }
+                        return a;
+                    },
+                },
+                columns: [
+                    {
+                        title: "Action",
+                        "render": function (data, type, row, meta) {
+                            var show = "<a class='btn btn-primary btn-xs' title='View Class Record' href='/Home/EditEmployee/"+ row.EmployeeID +"'>Edit Record</a> "
+
+                            var encode = "<a class='btn btn-success btn-xs' title='Edit Grades' href='/Home/ProcessPayroll/" + row.EmployeeID + "'>Process Payroll</a>";
+                            return show + encode;
+                        }
+                    },
+                    {
+                        title: "Name",
+                        data: "Name"
+                    },
+                    {
+                        title: "Birth Date",
+                        data: "BirthDate"
+                    },
+                    {
+                        title: "TIN",
+                        data: "TIN"
+                    },
+                    {
+                        title: "Employee Type",
+                        data: "EmployeeTypeDescription"
+                    }
+                ],
+            });
+            return table;
+        }
+    </script>
+}

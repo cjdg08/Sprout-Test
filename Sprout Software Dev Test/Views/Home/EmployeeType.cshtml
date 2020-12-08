@@ -1,0 +1,209 @@
+﻿
+@{
+    ViewData["Title"] = "EmployeeType";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <button id="AddEmpType" class="btn btn-success">New Employee Type</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-hover table-striped table-bordered" cellspacing="0" id="tblEmployeeTypeList"></table>
+    </div>
+</div>
+
+<div class="modal fade" id="NewEmpType" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Employee Type</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <label for="EmployeeType" class="control-label col-xs-12 col-sm-12 col-md-4 col-lg-4">Employee Type</label>
+                            <div class="col-xs-12 col-sm-12 col-md-12col-lg-12">
+                                <input type="text" id="EmployeeType" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <label for="SalaryType" class="control-label col-xs-12 col-sm-12 col-md-4 col-lg-4">Salary Type</label>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <select id="SalaryType" class="form-control">
+                                    <option>- Select Salary Type -</option>
+                                    <option value="1">Monthly</option>
+                                    <option value="2">Daily</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" id="divWorkDays">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <label for="WorkDaysPerMonth" class="control-label col-xs-12 col-sm-12 col-md-4 col-lg-4">Work Days/Month</label>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <input type="text" id="WorkDaysPerMonth" class="form-control days" value="0.00" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                        <div class="form-group">
+                            <label for="TaxPercentage" class="control-label col-xs-12 col-sm-12 col-md-4 col-lg-4">Tax Percentage</label>
+                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                                <input type="text" id="TaxPercentage" class="form-control percentage" value="0.00 %" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="Save" class="btn btn-primary"><i class="fa fa-save"></i>&nbsp;Save</button>
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal"><i class="fa fa-times"></i>&nbsp;Cancel</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+
+            $("#AddEmpType").click(function () {
+                $("#NewEmpType").modal({ backdrop: 'static', keyboard: false }, 'show');
+                $("#SalaryType").change();
+                $("#SalaryType").change(function () {
+                    if ($(this).val() == 1) {
+                        $("#divWorkDays").css("display", "");
+                    }
+                    else {
+                        $("#divWorkDays").css("display", "none");
+                        $("#WorkDaysPerMonth").val("0.00");
+                    }
+                });
+            });
+
+            $("#Save").click(function () {
+                if ($("#EmployeeType").val() == "") {
+                    toastr.warning("Employee type is required, Please enter employee type");
+                    return;
+                }
+                if ($("#SalaryType").val() == "") {
+                    toastr.warning("Salary type is required, Please select salary type");
+                    return;
+                }
+                if ($("#SalaryType").val() == 1) {
+                    if ($("#WorkDaysPerMonth").val() == "" || $("#WorkDaysPerMonth").val() == 0) {
+                        toastr.warning("Work days/month is required, Please enter Work days/month");
+                        return;
+                    }
+                }
+
+                if (confirm("Are you sure you want to save?")) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("SaveEmployeeType")',
+                        data: {
+                            EmployeeTypeDescription: $("#EmployeeType").val(),
+                            SalaryType: $("#SalaryType").val(),
+                            WorkDaysPerMonth: $("#WorkDaysPerMonth").val(),
+                            TaxPercentage: accounting.formatMoney($("#TaxPercentage").val(), "", 2, "", ".")
+                        },
+                        dataType: 'JSON',
+                        success: function (data) {
+                            if (data == "Success") {
+                                toastr.success("Employee Type successfully saved.");
+                                $("#NewEmpType").modal('hide');
+                                $("#EmployeeType").val('');
+                                $("#SalaryType").val(0);
+                                $("#WorkDaysPerMonth").val('0.00');
+                                $("#TaxPercentage").val('0.00 %');
+                                GetEmployeeTypeList();
+                            }
+                            else {
+                                toastr.error("Error saving data.");
+                            }
+                        }
+                    });
+                }
+            });
+
+            GetEmployeeTypeList();
+        });
+
+        function GetEmployeeTypeList() {
+            table = $('#tblEmployeeTypeList').DataTable({
+                bLengthChange: false,
+                responsive: true,
+                destroy: true,
+                order: [[0, 'asc']],
+                paging: false,
+                ordering: false,
+                ajax: {
+                    type: "GET",
+                    url: '@Url.Action("GetEmployeeTypeList")',
+                    dataType: 'json',
+                    dataSrc: function (json) {
+                        var a = new Array();
+                        for (var b = 0; b <= json.length - 1; b++) {
+                            var c = json[b];
+                            a.push({
+                                'EmployeeTypeID': c.employeeTypeID,
+                                'EmployeeTypeDescription': c.employeeTypeDescription,
+                                'SalaryType': c.salaryType,
+                                'WorkDaysPerMonth': c.workDaysPerMonth,
+                                'TaxPercentage': accounting.formatMoney(c.taxPercentage, { symbol: "%", format: "%v %s" })
+                            });
+                        }
+                        return a;
+                    },
+                },
+                columns: [
+                    {
+                        title: "Action",
+                        "render": function (data, type, row, meta) {
+                            var show = "<a class='btn btn-primary btn-xs' title='View Class Record' href='/Home/EditEmployee/" + row.EmployeeTypeID + "'>Edit Record</a> ";
+                            return show;
+                        }
+                    },
+                    {
+                        title: "Employee Type",
+                        data: "EmployeeTypeDescription"
+                    },
+                    {
+                        title: "Salary Type",
+                        "render": function (data, type, row, meta) {
+                            var show = "";
+                            if (row.SalaryType == 1) {
+                                show = "Monthly"
+                            }
+                            else {
+                                show = "Daily"
+                            }
+                            return show;
+                        }
+                    },
+                    {
+                        title: "Work Days Per Month",
+                        data: "WorkDaysPerMonth"
+                    },
+                    {
+                        title: "Tax Percentage",
+                        data: "TaxPercentage"
+                    }
+                ],
+            });
+            return table;
+        }
+    </script>
+}

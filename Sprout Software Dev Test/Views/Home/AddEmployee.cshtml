@@ -1,0 +1,114 @@
+﻿
+@{
+    ViewData["Title"] = "New Employee";
+}
+
+<h3>Add Employee Information</h3>
+@using (Html.BeginForm())
+{
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="form-group">
+                    <label for="Name" class="control-label col-md-2">Name</label>
+                    <div class="col-md-5">
+                        <input type="text" id="Name" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="BirthDate" class="control-label col-md-2">Birth Date</label>
+                    <div class="col-md-5">
+                        <input type="date" id="BirthDate" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="TIN" class="control-label col-md-2">TIN</label>
+                    <div class="col-md-5">
+                        <input type="text" id="TIN" class="form-control" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="EmployeeType" class="control-label col-md-2">Employee Type</label>
+                    <div class="col-md-5">
+                        @*<select id="EmployeeType" class="form-control">
+                            <option value="">- Select Employee Type -</option>
+                            <option value="1">Regular</option>
+                            <option value="2">Contractual</option>
+                        </select>*@
+                        @Html.DropDownList("EmployeeType", (IEnumerable<SelectListItem>)ViewBag.EmployeeType, new { @class = "form-control", id = "EmployeeType" })
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    <button type="submit" id="Save" class="btn btn-success" onclick="return false;" style="float: right">Save</button>
+                    <a href='@Url.Action("Index")' class="btn btn-outline-secondary">Back to List</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts{
+    <script>
+        $(document).ready(function () {
+            $("#TIN").mask("000-000-000");
+
+            $("#Save").click(function () {
+                if ($("#Name").val() == "") {
+                    toastr.warning("Name is requried field. Please enter name.");
+                    return;
+                }
+                if ($("#BirthDate").val() == "") {
+                    toastr.warning("Birth date is requried field. Please enter birth date.");
+                    return;
+                }
+                if ($("#TIN").val() == "") {
+                    toastr.warning("TIN is requried field. Please enter TIN.");
+                    return;
+                }
+                if ($("#EmployeeType").val() == "") {
+                    toastr.warning("Employee type is requried field. Please select employee type.");
+                    return;
+                }
+
+                if (confirm("Are you sure you want to save?")) {
+                    var token = $('[name=__RequestVerificationToken]').val();
+                    $.ajax({
+                        type: 'POST',
+                        url: '@Url.Action("SaveEmployee")',
+                        //headers: {
+                        //    __RequestVerificationToken: token
+                        //},
+                        data: {
+                            //__RequestVerificationToken: token,
+                            Name: $("#Name").val(),
+                            BirthDate: $("#BirthDate").val(),
+                            TIN: $("#TIN").cleanVal(),
+                            EmployeeType: $("#EmployeeType").val()
+                        },
+                        dataType: 'JSON',
+                        success: function (data) {
+                            if (data == "Success") {
+                                toastr.success("Successfully Saved");
+                                $("#Name").val('');
+                                $("#BirthDate").val('');
+                                $("#TIN").val('');
+                                $("#EmployeeType").val('');
+                            }
+                            else {
+                                toastr.error("Error saving data");
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+}

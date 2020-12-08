@@ -1,0 +1,147 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sprout_Software_Dev_Test</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" integrity="sha512-3pIirOrwegjM6erE5gPSwkUzO+3cTjpnV9lexlNZqvupR64iZBnOOTiiLPb9M36zpMScbmUNIcHUqKD47M719g==" crossorigin="anonymous" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+    <style>
+        .form-group {
+            width:100%;
+        }
+        .numeric, .days, .percentage {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"><img src="~/img/Sprout PNG 300px.png" style="max-height:50px" /></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Employee</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="EmployeeType">Employee Type</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2020 - Sprout_Software_Dev_Test - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js" integrity="sha512-pHVGpX7F/27yZ0ISY+VVjyULApbDlD0/X0rgGbTqCE7WFW5MezNTWG/dnhtbBuICzsd0WQPgpE4REBLv+UqChw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/accounting.js/0.4.1/accounting.min.js" integrity="sha512-LW+1GKW2tt4kK180qby6ADJE0txk5/92P70Oh5YbtD7heFlC0qFFtacvSnHG4bNXmLnZq5hNb2V70r5DzS/U+g==" crossorigin="anonymous"></script>
+    @RenderSection("Scripts", required: false)
+    <script>
+        $(document).ready(function () {
+            $(".numeric").focus(function () {
+                this.select();
+            });
+
+            $(".numeric").blur(function () {
+                var val = accounting.formatMoney($(this).val(), "", 2, ",", ".");
+                $(this).val(val);
+            });
+
+            $(".numeric").keypress(function (eve) {
+                if ((eve.which != 46 || $(this).val().indexOf('.') != -1) && (eve.which < 48 || eve.which > 57)) {
+                    if (eve.which == 45) {
+                        if ($(this).val().indexOf('.') >= 0) {
+                            eve.preventDefault();
+                        }
+                        else {
+                            if ($(this).length > 0) {
+                                eve.preventDefault();
+                            }
+                        }
+                    }
+                    else {
+                        eve.preventDefault();
+                    }
+                }
+            });
+
+            $(".days").focus(function () {
+                this.select();
+            });
+
+            $(".days").blur(function () {
+                var val = accounting.formatMoney($(this).val(), "", 2, "", ".");
+                $(this).val(val);
+            });
+
+            $(".days").keypress(function (eve) {
+                if ((eve.which != 46 || $(this).val().indexOf('.') != -1) && (eve.which < 48 || eve.which > 57)) {
+                    if (eve.which == 45) {
+                        if ($(this).val().indexOf('.') >= 0) {
+                            eve.preventDefault();
+                        }
+                        else {
+                            if ($(this).length > 0) {
+                                eve.preventDefault();
+                            }
+                        }
+                    }
+                    else {
+                        eve.preventDefault();
+                    }
+                }
+            });
+
+            $(".percentage").focus(function () {
+                this.select();
+            });
+
+            $(".percentage").blur(function () {
+                var val = accounting.formatMoney($(this).val(), { symbol: "%", format: "%v %s" });
+                $(this).val(val);
+            });
+
+            $(".percentage").keypress(function (eve) {
+                if ((eve.which != 46 || $(this).val().indexOf('.') != -1) && (eve.which < 48 || eve.which > 57)) {
+                    if (eve.which == 45) {
+                        if ($(this).val().indexOf('.') >= 0) {
+                            eve.preventDefault();
+                        }
+                        else {
+                            if ($(this).length > 0) {
+                                eve.preventDefault();
+                            }
+                        }
+                    }
+                    else {
+                        eve.preventDefault();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

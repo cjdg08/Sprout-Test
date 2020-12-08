@@ -1,0 +1,137 @@
+﻿@using ViewModel;
+@model EmployeeVM
+@{
+    ViewData["Title"] = "Process Payroll";
+}
+    <h3>Process Payroll</h3>
+@using (Html.BeginForm())
+{
+    <div class="row">
+        <div class="col-md-6">
+            <div class="row">
+                <div class="form-group">
+                    <label for="Name" class="control-label col-md-12">Name</label>
+                    <div class="col-md-12">
+                        <input type="text" id="Name" class="form-control" value="@Model.Name" disabled />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="BirthDate" class="control-label col-md-12">Birth Date</label>
+                    <div class="col-md-12">
+                        <input type="date" id="BirthDate" class="form-control" value="@Model.BirthDate.ToString("yyyy-MM-dd")"  disabled />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="TIN" class="control-label col-md-12">TIN</label>
+                    <div class="col-md-12">
+                        <input type="text" id="TIN" class="form-control" value="@Model.TIN"  disabled />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label for="EmployeeType" class="control-label col-md-12">Employee Type</label>
+                    <div class="col-md-12">
+                        @Html.DropDownList("EmployeeType", (IEnumerable<SelectListItem>)ViewBag.EmployeeType, new { @class = "form-control", id = "EmployeeType", @disabled = "disabled" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            @if (ViewBag.SalaryType == 1)
+            {
+                <div class="row">
+                    <div class="form-group">
+                        <label for="Basic" class="control-label col-md-12">Basic</label>
+                        <div class="col-md-12">
+                            <input type="text" id="Basic" class="form-control numeric" value="20,000.00" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="DaysAbsent" class="control-label col-md-12">Days absent</label>
+                        <div class="col-md-12">
+                            <input type="text" id="DaysAbsent" class="form-control days" value="0.00" />
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (ViewBag.SalaryType == 2)
+            {
+                <div class="row">
+                    <div class="form-group">
+                        <label for="Basic" class="control-label col-md-12">Daily Rate</label>
+                        <div class="col-md-12">
+                            <input type="text" id="Basic" class="form-control numeric" value="500.00" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group">
+                        <label for="DaysWorked" class="control-label col-md-12">Days Worked</label>
+                        <div class="col-md-12">
+                            <input type="text" id="DaysWorked" class="form-control days" value="0.00" />
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="row">
+                <div class="form-group">
+                    <label for="ComputedSalary" class="control-label col-md-12">Computed Salary</label>
+                    <div class="col-md-12">
+                        <input type="text" id="ComputedSalary" class="form-control numeric" value="" disabled />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <label class="control-label col-md-12"></label>
+                    <div class="col-md-12">
+                        <button type="submit" id="Calculate" class="btn btn-success" onclick="return false;" style="float: right">Calculate</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section scripts {
+    <script>
+        $(document).ready(function () {
+            $("#Calculate").click(function () {
+                var SalaryType = '@ViewBag.SalaryType';
+                var WorkDaysPerMonth = parseFloat('@ViewBag.WorkDaysPerMonth');
+                var TaxPercentage = parseFloat('@ViewBag.TaxPercentage') / 100.00;
+                if (SalaryType == 1) {
+                    if ($("#Basic").val() == "" || $("#Basic").val() == 0) {
+                        toastr.warning("Please enter basic salary.");
+                        return;
+                    }
+                    var basic = parseFloat(accounting.formatMoney($("#Basic").val(), "", 2, "", "."));
+                    var absent = parseFloat(accounting.formatMoney($("#DaysAbsent").val(), "", 2, "", "."));
+                    var calculated = basic - ((basic / WorkDaysPerMonth) * absent) - (basic * TaxPercentage);
+                    $("#ComputedSalary").val(accounting.formatMoney(calculated, "", 2, ",", "."));
+                }
+                else if (SalaryType == 2) {
+                    if ($("#Basic").val() == "" || $("#Basic").val() == 0) {
+                        toastr.warning("Please enter daily rate.");
+                        return;
+                    }
+                    if ($("#DaysWorked").val() == "" || $("#DaysWorked").val() == 0) {
+                        toastr.warning("Please enter work days/month.");
+                        return;
+                    }
+                    var basic = parseFloat(accounting.formatMoney($("#Basic").val(), "", 2, "", "."));
+                    var DaysWorked = parseFloat(accounting.formatMoney($("#DaysWorked").val(), "", 2, "", "."));
+                    var calculated = (basic * DaysWorked) - ((basic * DaysWorked) * TaxPercentage);
+                    $("#ComputedSalary").val(accounting.formatMoney(calculated, "", 2, ",", "."));
+                }
+            });
+        });
+    </script>
+}
